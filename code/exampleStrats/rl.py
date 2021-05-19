@@ -4,11 +4,13 @@ from collections import defaultdict
 import numpy as np
 
 def strategy(history, memory):
-    n = 5 # 1 <= 2^(2n) <= ? (upper limit defined by available memory)
+    n = 2 # 1 <= n <= ? (upper limit defined by available memory)
     eps = 0.0001 # prevent divide-by-zero errors
+    eps2 = 0.0001
+
     if memory is None:
         memory = {
-            'table': defaultdict(float), # table maps a state (n-length most-recent history slice)
+            'table': defaultdict(int), # table maps a state (n-length most-recent history slice)
                                          # to the number of times the opponent chose defect in
                                          # that state
             'total': defaultdict(int), # total maps a state to the number of times it was seen
@@ -26,7 +28,7 @@ def strategy(history, memory):
             choice = 0
     else:
         if prev_state is None:
-            prev_state = str(history[:, -2-n:-2])
+            prev_state = str(history[1, -1-n:-1])
 
         # update table & total based on previous state and opponent action
         total[prev_state] += 1
@@ -34,8 +36,10 @@ def strategy(history, memory):
         if opponent_action == 0: # opponent chose defect
             table[prev_state] += 1
 
+        print(table, total)
+
         # examine history of previous n turns
-        state = str(history[:,-1-n:-1])
+        state = str(history[1, -n:])
 
         # calculate expected returns from co-operate and defect
         cooperate_return = table[state] / (total[state] + eps) * 5 + (total[state] - table[state]) / (total[state] + eps) * 3
@@ -46,6 +50,10 @@ def strategy(history, memory):
             choice = 1
         else:
             choice = 0
+
+        # implement e-greedy action selection
+        #if random.random() < eps2:
+        #    choice = 1 - choice
 
         memory['table'] = table
         memory['total'] = total
