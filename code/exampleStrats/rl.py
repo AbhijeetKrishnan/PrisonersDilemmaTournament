@@ -30,14 +30,6 @@ def strategy(history, memory):
         if prev_state is None:
             prev_state = str(history[1, -1-n:-1])
 
-        # update table & total based on previous state and opponent action
-        total[prev_state] += 1
-        opponent_action = history[1,-1]
-        if opponent_action == 0: # opponent chose defect
-            table[prev_state] += 1
-
-        print(table, total)
-
         # examine history of previous n turns
         state = str(history[1, -n:])
 
@@ -54,6 +46,14 @@ def strategy(history, memory):
         # implement e-greedy action selection
         #if random.random() < eps2:
         #    choice = 1 - choice
+
+        # update table & total based on previous state and opponent action
+        total[state] += 1
+        opponent_action = history[1,-1]
+        if opponent_action == 0: # opponent chose defect
+            table[state] += 1
+
+        #print(table, total)
 
         memory['table'] = table
         memory['total'] = total
